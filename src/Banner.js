@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { nanoid } from 'nanoid';
 
-function Banner() {
+function Banner({ onNewTask }) {
   const [text, setText] = useState('');
   const [category, setCatogory] = useState('Outros');
   return (
@@ -8,6 +9,7 @@ function Banner() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          onNewTask({ id: nanoid(), text, category, logs: [] });
         }}
       >
         <select value={category} onChange={(e) => setCatogory(e.target.value)}>
@@ -21,7 +23,7 @@ function Banner() {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <Button type="submit">Adicionar</Button>
+        <button type="submit">Adicionar</button>
       </form>
     </div>
   );
