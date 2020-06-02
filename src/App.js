@@ -1,60 +1,73 @@
 import React from 'react';
-import Header from './Header';
-import Banner from './Banner';
-import Main from './Main';
+import styled, { ThemeProvider } from 'styled-components';
 import { useStorageState } from 'react-storage-hooks';
-import { ThemeProvider } from 'styled-components';
+
+import Header from './Header';
+import NewThingBanner from './NewThingBanner';
+import Main from './Main';
+
+const Container = styled.div`
+  position: fixed;
+  display: grid;
+  height: 100vh;
+  height: fill-available;
+  width: 100%;
+  grid-template-rows: 64px 130px auto;
+`;
 
 const THEMES = {
   dark: {
     background: '#3e3e3e',
+    selectedBackground: '#333',
     text: '#fff',
+    itemColor: '#fff',
+    newItemColor: '#fff',
     categoryColor: '#fff',
+    headerFilter: 'brightness(0) invert(1)',
   },
   light: {
     background: '#fff',
+    selectedBackground: '#f4f2f2',
     text: '#333',
+    itemColor: '#243b6b',
+    newItemColor: '#536388',
     categoryColor: '#929db6',
+    headerFilter: 'none',
   },
 };
 
 const App = () => {
-  const [tasks, setTasks] = useStorageState(localStorage, 'ja-fiz:db', []);
-
+  const [things, setThings] = useStorageState(localStorage, 'jafiz:db', []);
   const [darkTheme, setDarkTheme] = useStorageState(
     localStorage,
-    'ja-fiz:theme',
+    'jafiz:dark',
     false
   );
   return (
     <ThemeProvider theme={THEMES[darkTheme ? 'dark' : 'light']}>
-      <>
-        <Header onToggleDarkTheme={() => setDarkTheme(!darkTheme)} />
-        <Banner
-          onNewTask={(t) => {
-            setTasks([...tasks, t]);
-          }}
-        />
+      <Container>
+        <Header toggleDarkTheme={() => setDarkTheme(!darkTheme)} />
+        <NewThingBanner onNewThing={(t) => setThings([...things, t])} />
         <Main
-          tasks={tasks}
-          onNewTaskDone={(taskId, log) => {
-            setTasks([
-              ...tasks.map((t) => {
-                if (t.id !== taskId) {
-                  return t;
+          things={things}
+          onNewThingDone={(thingId, thingDone) =>
+            setThings([
+              ...things.map((t2) => {
+                if (thingId !== t2.id) {
+                  return t2;
                 }
-                return { ...t, logs: [...t.logs, log] };
+                return { ...t2, when: [...t2.when, thingDone] };
               }),
-            ]);
-          }}
-          onRemoveTask={(taskId) => {
+            ])
+          }
+          removeThing={(id) => {
             if (!window.confirm('Tem certeza?')) {
               return;
             }
-            setTasks([...tasks.filter((t) => t.id !== taskId)]);
+            setThings([...things.filter((t2) => t2.id !== id)]);
           }}
         />
-      </>
+      </Container>
     </ThemeProvider>
   );
 };
